@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: ravindra725/ultimate:4
+        image: ravindra725/ultimate:1
         ports:
         - containerPort: 8080
