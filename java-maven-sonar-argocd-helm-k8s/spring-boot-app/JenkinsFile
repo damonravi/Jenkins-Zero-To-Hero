@@ -45,7 +45,7 @@ pipeline {
         }
       }
     }
-   stage('Update Deployment File') {
+stage('Update Deployment File') {
     environment {
         GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
         GIT_USER_NAME = "damonravi"
@@ -61,6 +61,9 @@ pipeline {
 
                 # Ensure we are on the correct branch
                 git checkout main || git checkout -b main
+
+                # Pull the latest changes from the remote repository
+                git pull --rebase https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} main || true
 
                 # Update the deployment file with the new BUILD_NUMBER
                 BUILD_NUMBER=${BUILD_NUMBER}
@@ -78,6 +81,7 @@ pipeline {
         }
     }
 }
+
 
   }
 }
