@@ -45,24 +45,39 @@ pipeline {
         }
       }
     }
-    stage('Update Deployment File') {
-        environment {
-            GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
-            GIT_USER_NAME = "damonravi"
-        }
-        steps {
-            withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                sh '''
-                    git config user.email "ravindrababuthirumalaseety@gmail.com"
-                    git config user.name "Ravindra Thirumalasetty"
-                    BUILD_NUMBER=${BUILD_NUMBER}
-                    sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-                    git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                '''
-            }
+   stage('Update Deployment File') {
+    environment {
+        GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
+        GIT_USER_NAME = "damonravi"
+    }
+    steps {
+        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+            sh '''
+                set -x
+
+                # Configure Git user details
+                git config user.email "ravindrababuthirumalaseety@gmail.com"
+                git config user.name "Ravindra Thirumalasetty"
+
+                # Ensure we are on the correct branch
+                git checkout main || git checkout -b main
+
+                # Update the deployment file with the new BUILD_NUMBER
+                BUILD_NUMBER=${BUILD_NUMBER}
+                sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+
+                # Add the updated deployment.yml file to staging
+                git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+
+                # Commit the changes
+                git commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
+
+                # Push the changes to the main branch
+                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+            '''
         }
     }
+}
+
   }
 }
